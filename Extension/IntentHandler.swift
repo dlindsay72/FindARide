@@ -26,7 +26,28 @@ class IntentHandler: INExtension, INRidesharingDomainHandling {
     }
     
     func handle(requestRide intent: INRequestRideIntent, completion: @escaping (INRequestRideIntentResponse) -> Void) {
+        let result = INRequestRideIntentResponse(code: .success, userActivity: nil)
+        let status = INRideStatus()
         
+        status.rideIdentifier = "abc123"
+        
+        status.pickupLocation = intent.pickupLocation
+        status.dropOffLocation = intent.dropOffLocation
+        
+        status.phase = INRidePhase.confirmed
+        
+        status.estimatedPickupDate = Date(timeIntervalSinceNow: 900)
+        
+        let vehicle = INRideVehicle()
+        
+        let image = UIImage(named: "car")
+        let data = UIImagePNGRepresentation(image!)
+        vehicle.mapAnnotationImage = INImage(imageData: data!)
+        
+        vehicle.location = intent.dropOffLocation?.location
+        result.rideStatus = status
+        
+        completion(result)
     }
     
     func handle(getRideStatus intent: INGetRideStatusIntent, completion: @escaping (INGetRideStatusIntentResponse) -> Void) {
@@ -43,10 +64,28 @@ class IntentHandler: INExtension, INRidesharingDomainHandling {
     }
     
     func resolvePickupLocation(forRequestRide intent: INRequestRideIntent, with completion: @escaping (INPlacemarkResolutionResult) -> Void) {
+        let result: INPlacemarkResolutionResult
         
+        if let requestedLocation = intent.pickupLocation {
+            result = INPlacemarkResolutionResult.success(with: requestedLocation)
+        } else {
+            result = INPlacemarkResolutionResult.needsValue()
+        }
+        completion(result)
     }
     
     func resolveDropOffLocation(forRequestRide intent: INRequestRideIntent, with completion: @escaping (INPlacemarkResolutionResult) -> Void) {
+        let result: INPlacemarkResolutionResult
+        
+        if let requestedLocation = intent.dropOffLocation {
+            result = INPlacemarkResolutionResult.success(with: requestedLocation)
+        } else {
+            result = INPlacemarkResolutionResult.needsValue()
+        }
+        
+        completion(result)
+        
+        
         
     }
     
